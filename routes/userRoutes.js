@@ -28,9 +28,10 @@ userRouter.post("/sign",async(req,res)=>{
 
 // Middleware for JWT authentication
 const authenticateJWT = (req, res, next) => {
-    const token = req.headers.authorization;
-    console.log(token);
+    let token = req.headers.authorization;
+    console.log('token',token);
     if (token) {
+      token = token.split(" ")[1]
       jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
         if (err) {
           return res.status(403).send("not validate");
@@ -48,12 +49,23 @@ const authenticateJWT = (req, res, next) => {
 userRouter.post('/login', async (req, res) => {
     const { name, password } = req.body;
     const user = await UserModel.findOne({ name });
+    console.log(user);
     if (!user || !bcrypt.compareSync(password, user.password)) {
       return res.status(401).json({ message: 'Invalid username or password' });
     }
-    const accessToken = jwt.sign({ name: user.name, roles: user.roles }, process.env.JWT_SECRET);
+    const accessToken = jwt.sign({ name: user.name, roles: user.isAdmin }, process.env.JWT_SECRET);
     res.json({ accessToken });
+    console.log(accessToken);
   });
+
+  userRouter.get("/",async(req,res)=>{
+    try {
+      const users = await UserModel.find();
+      res.status(200).send(users);
+    } catch (error) {
+     res.status(400).send("error in getting users") 
+    }
+  })
 
   module.exports = {
     userRouter,authenticateJWT

@@ -12,7 +12,7 @@ bookRouter.get("/",async(req,res)=>{
     }
 });
 
-bookRouter.post("/post",async(req,res)=>{
+bookRouter.post("/post", authenticateJWT, async(req,res)=>{
     try {
         const newBooks = new BookModel(req.body);
         await newBooks.save();
@@ -22,7 +22,7 @@ bookRouter.post("/post",async(req,res)=>{
     }
 });
 
-bookRouter.delete("/delete/:id", async(req,res)=>{
+bookRouter.delete("/delete/:id", authenticateJWT, async(req,res)=>{
     const id = req.params.id;
     try {
         const deleteBook = await BookModel.findByIdAndDelete(id);
